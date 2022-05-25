@@ -18,7 +18,7 @@ $(document).ready(function() {
             timeout: 600000,
             success: function(data){
                 alert("Proceso Exitoso!");
-                $(".minTemp").text(data.minTemp)
+               $(".minTemp").text(data.minTemp)
                 $(".maxTemp").text(data.maxTemp)
                 $(".seconds").text(data.seconds)
 
