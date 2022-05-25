@@ -21,14 +21,4 @@ public class TempDataController {
     public  DataResultDTO getData(@RequestBody FormDTO valuesForm) throws ParseException {
         return tempDataService.getData(valuesForm);
     }
-
-
-
-
-
-   
-
-
-
-
 }

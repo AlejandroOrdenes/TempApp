@@ -42,6 +42,7 @@ public class TempDataService {
 
 
         List<TempDataDTO> dataSortDto = sortData(dataAPI);
+
         Double minTemp = 0.0;
         Double maxTemp = 0.0;
         for (int i = 0; i < dataSortDto.size(); i++) {
