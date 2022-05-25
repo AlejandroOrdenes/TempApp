@@ -5,13 +5,14 @@ $(document).ready(function() {
     $("#calcular").on("click", function(e) {
         e.preventDefault()
         let data = {}
-        data["from"] =  $("#from").val();
-        data["to"] =  $("#to").val();
-        data["tempObj"] =  $("#tempObj").val();
+        data["from"] = $("#from").val();
+        data["to"] = $("#to").val();
+        data["tempObj"] = $("#tempObj").val();
+        console.log(data)
         $.ajax({
             type:"POST",
             contentType: "application/json",
-            url: "/temp/getData",
+            url: "temp/getData",
             data: JSON.stringify(data),
             dataType:'json',
             timeout: 600000,

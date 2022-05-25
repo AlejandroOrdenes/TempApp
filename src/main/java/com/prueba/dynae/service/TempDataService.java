@@ -30,7 +30,7 @@ public class TempDataService {
     }
 
     public DataResultDTO getData(FormDTO formDTO) throws ParseException {
-        String url = "http://data-env.eba-pwemrg4q.us-east-1.elasticbeanstalk.com/data/sensorElement/8/measurement?from="+formDTO.getFrom()+"T04:00:00.000Z&to="+ formDTO.getTo()+"T03:59:59.000Z&timeUnit=SEC";
+        String url = "http://data-env.eba-pwemrg4q.us-east-1.elasticbeanstalk.com/data/sensorElement/8/measurement?from="+formDTO.getFrom()+":00.000Z&to="+ formDTO.getTo()+":59.000Z&timeUnit=SEC";
         ResponseEntity<Object[]> responseEntity = restTemplate.getForEntity(url, Object[].class);
 
         Object[] objects = responseEntity.getBody();
@@ -40,11 +40,18 @@ public class TempDataService {
                 .collect(Collectors.toList());
 
         List<TempDataDTO> dataSortDto = sortData(dataAPI);
-        System.out.println(dataSortDto);
+
+        Double minTemp = 0.0;
+        Double maxTemp = 0.0;
+        for (int i = 0; i < dataSortDto.size(); i++) {
+            minTemp = dataSortDto.get(0).getMagnitude();
+            int lstIdx = dataSortDto.size()-1;
+            maxTemp = dataSortDto.get(lstIdx).getMagnitude();
+        }
 
         DataResultDTO dataResult = new DataResultDTO();
-        dataResult.setMaxTemp(getMaxTemp(dataSortDto));
-        dataResult.setMinTemp(getMinTemp(dataSortDto));
+        dataResult.setMaxTemp(maxTemp);
+        dataResult.setMinTemp(minTemp);
         dataResult.setTempObjt((formDTO.getTempObj()));
         dataResult.setSeconds(getSecond(dataSortDto, formDTO.getTempObj()));
 
@@ -64,20 +71,19 @@ public class TempDataService {
         return data;
 
     }
-    public Double getSecond(List<TempDataDTO> data, Double temp) throws ParseException {
+    public Double getSecond(List<TempDataDTO> data, Double temp) {
 
         int lastIdx = data.size()-1;
         String end = data.get(lastIdx).getTimestamp();
         String init = data.get(0).getTimestamp();
-        for (int i = 0; i < data.size(); i++) {
-            if(data.get(i).getMagnitude() > temp) {
-                init = data.get(i).getTimestamp();
+        for (TempDataDTO datum : data)
+            if (datum.getMagnitude() > temp) {
+                init = datum.getTimestamp();
                 break;
             } else {
                 end = data.get(lastIdx).getTimestamp();
                 init = data.get(lastIdx).getTimestamp();
             }
-        }
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime dateInit = LocalDateTime.parse(init, formatter);
@@ -86,37 +92,13 @@ public class TempDataService {
          Double seconds;
 
         if (dateInit.isAfter(dateEnd)) {
-            seconds = Double.valueOf((ChronoUnit.SECONDS.between(dateEnd, dateInit)%86400));
+            seconds = (double) (ChronoUnit.SECONDS.between(dateEnd, dateInit) % 86400);
         } else {
-            seconds = Double.valueOf((ChronoUnit.SECONDS.between(dateInit, dateEnd)%86400));
+            seconds = (double) (ChronoUnit.SECONDS.between(dateInit, dateEnd) % 86400);
         }
 
         return seconds;
     }
-
-    public Double getMaxTemp(List<TempDataDTO> data) {
-        Double max = data.get(0).getMagnitude();
-        for (int i = 0; i < data.size(); i++) {
-            var temp = data.get(i).getMagnitude();
-            if (temp > max) {
-                max = temp;
-            }
-        }
-        return max;
-    }
-
-    public Double getMinTemp(List<TempDataDTO> data) {
-        Double min = data.get(0).getMagnitude();
-        for (int i = 0; i < data.size(); i++) {
-            Double temp = data.get(i).getMagnitude();
-            if (temp < min) {
-                min = temp;
-            }
-
-        }
-        return min;
-    }
-
 
 }
 
