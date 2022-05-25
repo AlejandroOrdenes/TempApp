@@ -30,7 +30,7 @@ public class TempDataService {
     }
 
     public DataResultDTO getData(FormDTO formDTO) throws ParseException {
-        String url = "http://data-env.eba-pwemrg4q.us-east-1.elasticbeanstalk.com/data/sensorElement/8/measurement?from="+formDTO.getFrom()+":00.000Z&to="+ formDTO.getTo()+":59.000Z&timeUnit=SEC";
+        String url = "http://data-env.eba-pwemrg4q.us-east-1.elasticbeanstalk.com/data/sensorElement/8/measurement?from="+formDTO.getFrom()+":00.000Z&to="+ formDTO.getTo()+":00.000Z&timeUnit=SEC";
         ResponseEntity<Object[]> responseEntity = restTemplate.getForEntity(url, Object[].class);
 
         Object[] objects = responseEntity.getBody();
@@ -46,7 +46,8 @@ public class TempDataService {
         for (int i = 0; i < dataSortDto.size(); i++) {
             minTemp = dataSortDto.get(0).getMagnitude();
             int lstIdx = dataSortDto.size()-1;
-            maxTemp = dataSortDto.get(lstIdx).getMagnitude();
+            maxTemp = dataSortDto.get(lstIdx -1).getMagnitude();
+            break;
         }
 
         DataResultDTO dataResult = new DataResultDTO();

@@ -16,7 +16,6 @@ public class TempDataController {
     @Autowired
     private TempDataService tempDataService;
 
-
     @RequestMapping(value = "/getData", method = {RequestMethod.POST, RequestMethod.GET}, produces = "application/json")
     @ResponseBody
     public  DataResultDTO getData(@RequestBody FormDTO valuesForm) throws ParseException {
@@ -24,10 +23,7 @@ public class TempDataController {
     }
 
 
-    @RequestMapping(value = "/index")
-    public String index() {
-        return "index";
-    }
+
 
 
    
