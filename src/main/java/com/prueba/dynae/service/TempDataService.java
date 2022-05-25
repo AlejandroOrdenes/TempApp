@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,14 +40,14 @@ public class TempDataService {
                 .map(object -> mapper.convertValue(object, TempDataDTO.class))
                 .collect(Collectors.toList());
 
-        List<TempDataDTO> dataSortDto = sortData(dataAPI);
 
+        List<TempDataDTO> dataSortDto = sortData(dataAPI);
         Double minTemp = 0.0;
         Double maxTemp = 0.0;
         for (int i = 0; i < dataSortDto.size(); i++) {
             minTemp = dataSortDto.get(0).getMagnitude();
             int lstIdx = dataSortDto.size()-1;
-            maxTemp = dataSortDto.get(lstIdx -1).getMagnitude();
+            maxTemp = dataSortDto.get(lstIdx).getMagnitude();
             break;
         }
 
@@ -73,24 +74,41 @@ public class TempDataService {
 
     }
     public Double getSecond(List<TempDataDTO> data, Double temp) {
+        String end = "";
+        String init = "";
+        Double seconds;
+        Double totalSeconds=0.0;
 
-        int lastIdx = data.size()-1;
-        String end = data.get(lastIdx).getTimestamp();
-        String init = data.get(0).getTimestamp();
-        for (TempDataDTO datum : data)
-            if (datum.getMagnitude() > temp) {
-                init = datum.getTimestamp();
-                break;
-            } else {
-                end = data.get(lastIdx).getTimestamp();
-                init = data.get(lastIdx).getTimestamp();
+
+        for (int i = 0; i < data.size(); i++) {
+            if (data.get(i).getMagnitude() > temp && init == "") {
+                init = data.get(i).getTimestamp();
             }
+            if (data.get(i).getMagnitude() < temp && init != "") {
+                end = data.get(i).getTimestamp();
+                seconds = calcSecond(init, end);
+                totalSeconds += totalSeconds + seconds;
+                init = "";
+                end = "";
+            }
+            if(init != "" && i == data.size()-1) {
+                end = data.get(i).getTimestamp();
+                seconds = calcSecond(init, end);
+                totalSeconds += totalSeconds + seconds;
+                init = "";
+                end = "";
+            }
+        }
 
+        return totalSeconds;
+    }
+
+    public Double calcSecond(String init, String end) {
+        Double seconds;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime dateInit = LocalDateTime.parse(init, formatter);
         LocalDateTime dateEnd = LocalDateTime.parse(end, formatter);
 
-         Double seconds;
 
         if (dateInit.isAfter(dateEnd)) {
             seconds = (double) (ChronoUnit.SECONDS.between(dateEnd, dateInit) % 86400);
@@ -102,5 +120,7 @@ public class TempDataService {
     }
 
 }
+
+
 
 
